@@ -1,0 +1,176 @@
+Script started on Thu 07 Jul 2016 05:19:27 PM PDT
+2016/07/07 17:20:15 Attempting to create PD "test-20160707172015"
+2016/07/07 17:20:15 Executing: gcloud [compute --quiet --project=google.com:ciwang-kubernetes disks create --zone=us-central1-b --size=10GB test-20160707172015]
+2016/07/07 17:20:24 Created PD "test-20160707172015" successfully. Output: "WARNING: You have selected a disk size of under [200GB]. This may result in poor I/O performance. For more information, see: https://developers.google.com/compute/docs/disks#pdperformance.\nCreated [https://www.googleapis.com/compute/v1/projects/google.com:ciwang-kubernetes/zones/us-central1-b/disks/test-20160707172015].\nNAME                 ZONE           SIZE_GB  TYPE         STATUS\ntest-20160707172015  us-central1-b  10       pd-standard  READY\n"
+------------
+2016/07/07 17:20:24 Successfully created a new PD: "test-20160707172015".
+2016/07/07 17:20:24 ***Attach PD RW to host0
+2016/07/07 17:20:24 Attempting to attach PD "test-20160707172015" to "e2e-test-ciwang-minion-group-21nq" as "rw"
+2016/07/07 17:20:24 Executing: gcloud [compute instances --quiet attach-disk e2e-test-ciwang-minion-group-21nq --disk=test-20160707172015 --device-name=test-20160707172015 --mode=rw --zone=us-central1-b]
+2016/07/07 17:20:42 Attaching PD "test-20160707172015" to "e2e-test-ciwang-minion-group-21nq" as "rw" succeeded. Output: "Updated [https://www.googleapis.com/compute/v1/projects/google.com:ciwang-kubernetes/zones/us-central1-b/instances/e2e-test-ciwang-minion-group-21nq].\n"
+------------
+2016/07/07 17:20:42 Successfully attach PD "test-20160707172015" to "e2e-test-ciwang-minion-group-21nq".
+2016/07/07 17:20:42 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command ls /dev/disk/by-id/]
+2016/07/07 17:20:45 ls /dev/disk/by-id/
+google-persistent-disk-0
+google-persistent-disk-0-part1
+google-test-20160707172015
+scsi-0Google_PersistentDisk_persistent-disk-0
+scsi-0Google_PersistentDisk_persistent-disk-0-part1
+scsi-0Google_PersistentDisk_test-20160707172015
+2016/07/07 17:20:45 Attempting to create directory "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" 
+2016/07/07 17:20:45 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command mkdir -p -m 0750 /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015]
+------------
+2016/07/07 17:20:49 Run fsck on disk "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" to fix repairable issues
+2016/07/07 17:20:49 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command fsck -a /dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015]
+2016/07/07 17:20:52 Failed running fsck on disk "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" to fix repairable issues. error: failed: err=exit status 8
+output: fsck from util-linux 2.20.1
+/dev/sdb: 
+The fsck.ext2: Bad magic number in super-block while trying to open /dev/sdb
+superblock could not be read or does not describe a correct ext2
+filesystem.  If the device is valid and it really contains an ext2
+filesystem (and not swap or ufs or something else), then the superblock
+is corrupt, and you might try running e2fsck with an alternate superblock:
+    e2fsck -b 8193 <device>
+
+
+
+------------
+2016/07/07 17:20:52 `fsck` error failed: err=exit status 8
+output: fsck from util-linux 2.20.1
+/dev/sdb: 
+The fsck.ext2: Bad magic number in super-block while trying to open /dev/sdb
+superblock could not be read or does not describe a correct ext2
+filesystem.  If the device is valid and it really contains an ext2
+filesystem (and not swap or ufs or something else), then the superblock
+is corrupt, and you might try running e2fsck with an alternate superblock:
+    e2fsck -b 8193 <device>
+
+
+2016/07/07 17:20:52 Attempting to mount "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" to "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" with fstype "ext4" and options [defaults]
+2016/07/07 17:20:52 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command mount -t ext4 -o defaults /dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015 /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015]
+2016/07/07 17:20:55 Failed mount "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" to "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" with fstype "ext4" and options [defaults]. error: failed: err=exit status 32
+output: mount: wrong fs type, bad option, bad superblock on /dev/sdb,
+       missing codepage or helper program, or other error
+       In some cases useful info is found in syslog - try
+       dmesg | tail  or so
+
+
+
+------------
+2016/07/07 17:20:55 Checking if "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015" is formatted on "e2e-test-ciwang-minion-group-21nq"
+2016/07/07 17:20:55 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command lsblk -nd -o FSTYPE /dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015]
+2016/07/07 17:20:59 Checking if "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015" is formatted on "e2e-test-ciwang-minion-group-21nq". Result: true Output: ""
+------------
+2016/07/07 17:20:59 Disk looks unformated, will attempt to format it.
+2016/07/07 17:20:59 Attempting to format "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" with fstype "ext4" and options %!v(MISSING)
+2016/07/07 17:20:59 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command mkfs.ext4 -E lazy_itable_init=0,lazy_journal_init=0 -F /dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015]
+------------
+2016/07/07 17:21:03 Disk formated successfully, will attempt to mount it.
+2016/07/07 17:21:03 Attempting to mount "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" to "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" with fstype "ext4" and options [defaults]
+2016/07/07 17:21:03 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command mount -t ext4 -o defaults /dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015 /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015]
+------------
+2016/07/07 17:21:07 Successfully formatAndMount "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" to "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015"
+2016/07/07 17:21:07 Successfully mounted "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" to "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015"
+2016/07/07 17:21:07 Attempting to create directory "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" 
+2016/07/07 17:21:07 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command mkdir -p -m 0750 /var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015]
+------------
+2016/07/07 17:21:10 Attempting to mount "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" to "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" with fstype "" and options [bind]
+2016/07/07 17:21:10 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command mount -o bind /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015 /var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015]
+------------
+2016/07/07 17:21:13 Attempting to mount "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" to "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" with fstype "" and options [remount]
+2016/07/07 17:21:13 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command mount -o remount /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015 /var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015]
+------------
+2016/07/07 17:21:17 Successfully bind mounted "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" to "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015"
+2016/07/07 17:21:17 Writing "hello world" to "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015/mytest.log" on "e2e-test-ciwang-minion-group-21nq"
+2016/07/07 17:21:17 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command echo 'hello world' > '/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015/mytest.log'; sync]
+------------
+2016/07/07 17:21:20 Reading "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015/mytest.log" on "e2e-test-ciwang-minion-group-21nq"
+2016/07/07 17:21:20 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command cat '/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015/mytest.log']
+------------
+2016/07/07 17:21:24 Sleeping before unmount
+2016/07/07 17:21:27 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command /home/ciwang/exclOpen /dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015]
+2016/07/07 17:21:30 Before bind unmount: Expect error, got "failed: err=exit status 42\noutput: Busy: Device or resource busy\n\n"
+2016/07/07 17:21:30 Attempting to unmount "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" 
+2016/07/07 17:21:30 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command umount /var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015]
+------------
+2016/07/07 17:21:34 Attempting to remove directory "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" 
+2016/07/07 17:21:34 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command rmdir /var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015]
+------------
+2016/07/07 17:21:37 Successfully removed bind mount "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015"
+2016/07/07 17:21:37 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command /home/ciwang/exclOpen /dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015]
+2016/07/07 17:21:40 After bind unmount: Expect error, got "failed: err=exit status 42\noutput: Busy: Device or resource busy\n\n"
+2016/07/07 17:21:40 Attempting to unmount "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" 
+2016/07/07 17:21:40 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command umount /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015]
+------------
+2016/07/07 17:21:44 Attempting to remove directory "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" on "e2e-test-ciwang-minion-group-21nq" 
+2016/07/07 17:21:44 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command rmdir /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015]
+------------
+2016/07/07 17:21:47 Successfully unmounted "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015"
+2016/07/07 17:21:47 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-21nq --command /home/ciwang/exclOpen /dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015]
+2016/07/07 17:21:51 After global unmount: Expect error is nil, got %!q(<nil>)
+2016/07/07 17:21:51 Attempting to detach PD "test-20160707172015" from "e2e-test-ciwang-minion-group-21nq"
+2016/07/07 17:21:51 Executing: gcloud [compute instances --quiet detach-disk e2e-test-ciwang-minion-group-21nq --disk=test-20160707172015 --zone=us-central1-b]
+2016/07/07 17:21:59 Detaching PD "test-20160707172015" from "e2e-test-ciwang-minion-group-21nq" succeeded. Output: "Updated [https://www.googleapis.com/compute/v1/projects/google.com:ciwang-kubernetes/zones/us-central1-b/instances/e2e-test-ciwang-minion-group-21nq].\n"
+------------
+2016/07/07 17:21:59 Successfully detach PD "test-20160707172015" to "e2e-test-ciwang-minion-group-21nq".
+2016/07/07 17:21:59 ***Detached PD RW from host0
+2016/07/07 17:21:59 ***Attaching PD RW to host1
+2016/07/07 17:21:59 Attempting to attach PD "test-20160707172015" to "e2e-test-ciwang-minion-group-62zl" as "rw"
+2016/07/07 17:21:59 Executing: gcloud [compute instances --quiet attach-disk e2e-test-ciwang-minion-group-62zl --disk=test-20160707172015 --device-name=test-20160707172015 --mode=rw --zone=us-central1-b]
+2016/07/07 17:22:11 Attaching PD "test-20160707172015" to "e2e-test-ciwang-minion-group-62zl" as "rw" succeeded. Output: "Updated [https://www.googleapis.com/compute/v1/projects/google.com:ciwang-kubernetes/zones/us-central1-b/instances/e2e-test-ciwang-minion-group-62zl].\n"
+------------
+2016/07/07 17:22:11 Successfully attach PD "test-20160707172015" to "e2e-test-ciwang-minion-group-62zl".
+2016/07/07 17:22:11 Attempting to create directory "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" on "e2e-test-ciwang-minion-group-62zl" 
+2016/07/07 17:22:11 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command mkdir -p -m 0750 /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015]
+------------
+2016/07/07 17:22:15 Run fsck on disk "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015" on "e2e-test-ciwang-minion-group-62zl" to fix repairable issues
+2016/07/07 17:22:15 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command fsck -a /dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015]
+------------
+2016/07/07 17:22:18 Attempting to mount "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" to "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015" on "e2e-test-ciwang-minion-group-62zl" with fstype "ext4" and options [defaults]
+2016/07/07 17:22:18 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command mount -t ext4 -o defaults /dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015 /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015]
+------------
+2016/07/07 17:22:22 Successfully mounted "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" to "/dev/disk/by-id/scsi-0Google_PersistentDisk_test-20160707172015"
+2016/07/07 17:22:22 Attempting to create directory "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" on "e2e-test-ciwang-minion-group-62zl" 
+2016/07/07 17:22:22 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command mkdir -p -m 0750 /var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015]
+------------
+2016/07/07 17:22:25 Attempting to mount "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" to "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" on "e2e-test-ciwang-minion-group-62zl" with fstype "" and options [bind]
+2016/07/07 17:22:25 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command mount -o bind /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015 /var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015]
+------------
+2016/07/07 17:22:29 Attempting to mount "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" to "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" on "e2e-test-ciwang-minion-group-62zl" with fstype "" and options [remount]
+2016/07/07 17:22:29 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command mount -o remount /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015 /var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015]
+------------
+2016/07/07 17:22:32 Successfully bind mounted "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" to "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015"
+2016/07/07 17:22:32 Reading "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015/mytest.log" on "e2e-test-ciwang-minion-group-62zl"
+2016/07/07 17:22:32 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command cat '/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015/mytest.log']
+------------
+2016/07/07 17:22:36 Sleeping before unmount
+2016/07/07 17:22:46 Attempting to unmount "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" on "e2e-test-ciwang-minion-group-62zl" 
+2016/07/07 17:22:46 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command umount /var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015]
+------------
+2016/07/07 17:22:49 Attempting to remove directory "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015" on "e2e-test-ciwang-minion-group-62zl" 
+2016/07/07 17:22:49 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command rmdir /var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015]
+------------
+2016/07/07 17:22:53 Successfully removed bind mount "/var/lib/ciwang/pods/volumes/kubernetes.io~gce-pd/test-20160707172015"
+2016/07/07 17:22:53 Attempting to unmount "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" on "e2e-test-ciwang-minion-group-62zl" 
+2016/07/07 17:22:53 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command umount /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015]
+------------
+2016/07/07 17:22:56 Attempting to remove directory "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015" on "e2e-test-ciwang-minion-group-62zl" 
+2016/07/07 17:22:56 Executing: gcloud [compute ssh root@e2e-test-ciwang-minion-group-62zl --command rmdir /var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015]
+------------
+2016/07/07 17:23:00 Successfully unmounted "/var/lib/ciwang/plugins/kubernetes.io/gce-pd/mounts/test-20160707172015"
+2016/07/07 17:23:00 Attempting to detach PD "test-20160707172015" from "e2e-test-ciwang-minion-group-62zl"
+2016/07/07 17:23:00 Executing: gcloud [compute instances --quiet detach-disk e2e-test-ciwang-minion-group-62zl --disk=test-20160707172015 --zone=us-central1-b]
+2016/07/07 17:23:08 Detaching PD "test-20160707172015" from "e2e-test-ciwang-minion-group-62zl" succeeded. Output: "Updated [https://www.googleapis.com/compute/v1/projects/google.com:ciwang-kubernetes/zones/us-central1-b/instances/e2e-test-ciwang-minion-group-62zl].\n"
+------------
+2016/07/07 17:23:08 Successfully detach PD "test-20160707172015" to "e2e-test-ciwang-minion-group-62zl".
+2016/07/07 17:23:08 ***Detached PD RW from host1
+2016/07/07 17:23:08 Attempting to delete PD "test-20160707172015"
+2016/07/07 17:23:08 Executing: gcloud [compute --quiet --project=google.com:ciwang-kubernetes disks delete --zone=us-central1-b test-20160707172015]
+2016/07/07 17:23:13 Deleting PD "test-20160707172015" succeeded. Output: "Deleted [https://www.googleapis.com/compute/v1/projects/google.com:ciwang-kubernetes/zones/us-central1-b/disks/test-20160707172015].\n"
+------------
+2016/07/07 17:23:13 Deleted PD test-20160707172015
+]0;ciwang@ciwang0: ~/src/miscciwang@ciwang0:~/src/misc$ exit
+exit
+
+Script done on Thu 07 Jul 2016 05:24:25 PM PDT
